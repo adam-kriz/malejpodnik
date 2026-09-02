@@ -224,10 +224,19 @@
     border-radius:6px;
     overflow:hidden;
     display:flex; flex-direction:column;
-    transition: border-color .2s ease;
+    transition: border-color .2s ease, opacity .6s ease, transform .6s ease;
     position:relative;
+    opacity:0;
+    transform:translateY(28px);
+  }
+  .menu-card.in-view{
+    opacity:1;
+    transform:translateY(0);
   }
   .menu-card:hover{ border-color: var(--espresso-soft); }
+  @media (prefers-reduced-motion: reduce){
+    .menu-card{ transition:none; opacity:1; transform:none; }
+  }
   .menu-photo{
     aspect-ratio:3/4; width:100%;
     position:relative; border-bottom:1px solid var(--line);
@@ -691,6 +700,24 @@
     );
     const isOpen = hourInPrague >= 8 && hourInPrague < 16;
     dot.classList.toggle('is-closed', !isOpen);
+  })();
+
+  (function(){
+    const cards = document.querySelectorAll('.menu-card');
+    if(!cards.length) return;
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if(entry.isIntersecting){
+          entry.target.style.transitionDelay = (entry.target.dataset.i * 70) + 'ms';
+          entry.target.classList.add('in-view');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15 });
+    cards.forEach((card, i) => {
+      card.dataset.i = i % 4;
+      observer.observe(card);
+    });
   })();
 </script>
 
